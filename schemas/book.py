@@ -17,4 +17,4 @@ class Book(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class BookWithCategory(Book):
-    categoria: Category
+    category: Category

@@ -10,7 +10,7 @@ class Lending(Base):
     __tablename__ = "lendings"
 
     id = Column(Integer, primary_key=True, index=True)
-    libro_id = Column(Integer, ForeignKey("books.id"), nullable=False)
+    book_id = Column(Integer, ForeignKey("books.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     lending_date = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     return_date = Column(DateTime, nullable=True)

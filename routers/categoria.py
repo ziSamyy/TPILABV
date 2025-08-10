@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from schemas.category import Category
 from models.categorias import Category as CategoryModel
+from models.libros import Book as BookModel
 from config.database import get_db
 from middlewares.jwt_bearer import JWTBearer
 
@@ -54,8 +55,11 @@ def get_categoria_por_id(categoria_id: int, db: Session = Depends(get_db)):
     dependencies=[Depends(JWTBearer())])
 def delete_categoria(categoria_id: int , db: Session = Depends(get_db)):
     categoria = db.query(CategoryModel).filter(CategoryModel.id == categoria_id).first()
+    libros_asociados = db.query(BookModel).filter(BookModel.category_id == categoria_id).count()
     if not categoria:
         raise HTTPException(status_code=404, detail="Categoria no encontrado")
+    if libros_asociados > 0:
+        raise HTTPException(status_code=400, detail="No se puede eliminar la categoria porque tiene libros asociados")
     db.delete(categoria)
     db.commit()
     return {"msg": "Categoria eliminado correctamente"}

@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 from schemas.book import Book, BookWithCategory
 from config.database import get_db
-from models.libros import Book as LibroModel
-from models.categorias import Category as CategoriaModel
+from models.libros import Book as BookModel
+from models.categorias import Category as CategoryModel
 from middlewares.jwt_bearer import JWTBearer
 from routers.categoria import categoria_router
 
@@ -13,11 +13,11 @@ libro_router = APIRouter()
 @libro_router.post("/libros", tags=["Libros"], response_model=Book,
     dependencies=[Depends(JWTBearer())])
 def create_libro(libro: Book, db: Session = Depends(get_db)):
-    categoria = db.query(CategoriaModel).filter(CategoriaModel.id == libro.categoria_id).first()
+    categoria = db.query(CategoryModel).filter(CategoryModel.id == libro.category_id).first()
     if not categoria:
         raise HTTPException(status_code=404, detail="Categoría no encontrada")
 
-    newbook = LibroModel(
+    newbook = BookModel(
     title=libro.title,
     author=libro.author,
     isbn=libro.isbn,
@@ -33,12 +33,12 @@ def create_libro(libro: Book, db: Session = Depends(get_db)):
 
 @libro_router.get("/libros", tags=["Libros"], response_model=List[BookWithCategory])
 def get_libros(db: Session = Depends(get_db)):
-    libros = db.query(LibroModel).options(joinedload(LibroModel.categoria)).all()
+    libros = db.query(BookModel).options(joinedload(BookModel.category)).all()
     return libros
     
 @libro_router.get("/libros/{libro_id}", tags=["Libros"], response_model=BookWithCategory)
 def get_libro_por_id(libro_id: int, db: Session = Depends(get_db)):
-    libro = db.query(LibroModel).options(joinedload(LibroModel.categoria)).filter(LibroModel.id == libro_id).first()
+    libro = db.query(BookModel).options(joinedload(BookModel.category)).filter(BookModel.id == libro_id).first()
     if not libro:
         raise HTTPException(status_code=404, detail="Libro no encontrado")
     return libro
@@ -46,11 +46,11 @@ def get_libro_por_id(libro_id: int, db: Session = Depends(get_db)):
 @libro_router.put("/libros/{libro_id}", tags=["Libros"], response_model=Book,
     dependencies=[Depends(JWTBearer())])
 def update_libro(libro_id: int, libro_update: Book, db: Session = Depends(get_db)):
-    libro = db.query(LibroModel).filter(LibroModel.id == libro_id).first()
+    libro = db.query(BookModel).filter(BookModel.id == libro_id).first()
     if not libro:
         raise HTTPException(status_code=404, detail="Libro no encontrado")
 
-    categoria = db.query(CategoriaModel).filter(CategoriaModel.id == libro_update.categoria_id).first()
+    categoria = db.query(CategoryModel).filter(CategoryModel.id == libro_update.category_id).first()
     if not categoria:
         raise HTTPException(status_code=404, detail="Categoría no encontrada")
 
@@ -70,7 +70,7 @@ def update_libro(libro_id: int, libro_update: Book, db: Session = Depends(get_db
 @libro_router.delete("/libros/{libro_id}", tags=["Libros"],
     dependencies=[Depends(JWTBearer())])
 def delete_libro(libro_id: int, db: Session = Depends(get_db)):
-    libro = db.query(LibroModel).filter(LibroModel.id == libro_id).first()
+    libro = db.query(BookModel).filter(BookModel.id == libro_id).first()
     if not libro:
         raise HTTPException(status_code=404, detail="Libro no encontrado")
 

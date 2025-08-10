@@ -18,7 +18,7 @@ def crear_prestamo(prestamo: Lending, db: Session = Depends(get_db)):
     if not libro:
         raise HTTPException(status_code=404, detail="Libro no encontrado")
 
-    if libro.cantidad == 0:
+    if libro.amount == 0:
         raise HTTPException(status_code=400, detail="El libro ya está prestado")
 
     newlending = LendingModel(
